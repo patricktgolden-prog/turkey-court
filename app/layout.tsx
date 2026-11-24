@@ -6,9 +6,9 @@ const heading = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-head
 const body = Nunito_Sans({ subsets: ["latin"], variable: "--font-body" })
 
 export const metadata: Metadata = {
-  title: "Study Plan Coach · Ship AI Starter",
+  title: "Turkey Pardon Court · Ship AI Starter",
   description:
-    "A real AI app built the safe way: sign-in, a locked-down database, one AI feature, and a guardrail. From 3percentclub x Block Convey.",
+    "File a case for your turkey and an AI judge rules: pardoned or dinner. Built the safe way: sign-in, row rules, a server-side AI call, and a guardrail.",
 }
 
 export const viewport: Viewport = {

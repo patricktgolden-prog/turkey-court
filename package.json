@@ -9,7 +9,9 @@
     "start": "next start",
     "db:setup": "node scripts/setup-db.mjs",
     "test:rls": "node scripts/rls-test.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:guardrail": "node scripts/guardrail-test.mjs",
+    "prism:check": "node scripts/prism-check.mjs"
   },
   "dependencies": {
     "ai": "^7.0.181",

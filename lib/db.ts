@@ -40,3 +40,21 @@ export type GuardrailNote = {
   redacted?: string[]
   outputRedacted?: string[]
 }
+
+export type CourtCase = {
+  id: string
+  turkey: string
+  alleged_crime: string
+  plea: string
+  argument: string
+  ruling: "pardoned" | "dinner" | null
+  reasoning: string | null
+  guardrail: CaseGuardrailNote
+  created_at: string
+}
+
+export type CaseGuardrailNote = GuardrailNote & {
+  bribeDetected?: boolean
+  overruled?: boolean
+  confused?: boolean
+}

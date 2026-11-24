@@ -24,6 +24,30 @@ const PERSONAL_INFO: { label: string; pattern: RegExp }[] = [
 const INJECTION =
   /\b(ignore|forget|override|bypass)\b.{0,30}\b(rules|instructions|guardrails?|prompt)\b|\b(system prompt|developer mode|jailbreak)\b|\b(every|all|other) (users?|people|accounts?)('s)? (data|rows|plans|records)\b/i
 
+// Turkey Pardon Court: nobody gets to claim they run the court.
+const AUTHORITY =
+  /\b(i'?m|i am|this is|speaking as) (the |an? |your )?(admin|administrator|judge|clerk|bailiff|developer|moderator|chief justice|staff)\b/i
+
+// Turkey Pardon Court: a case can only argue for itself. No touching other cases or past rulings.
+const CASE_TAMPER =
+  /\b(change|switch|flip|overturn|reverse|edit|update|delete|reopen|undo)\b.{0,40}\b(ruling|case|verdict|decision|docket|sentence)\b|\b(pardon|rule|free|spare)\b.{0,25}\b(every|all|other)\b.{0,15}\b(turkeys?|cases|birds)\b|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/i
+
+// Turkey Pardon Court: bribes are flagged, not blocked, so the judge can rule "dinner" and say why.
+const BRIBE: RegExp[] = [
+  /\bbrib(e|es|ed|ing|ery)\b/i,
+  /\bin it for (you|the judge|your honou?r)\b/i,
+  /\bnobody (has to|needs to|will) know\b/i,
+  /\$\s?\d+|\b\d+\s?(dollars|bucks)\b|\b(cash|venmo|cashapp|paypal|zelle)\b/i,
+  /\b(pay|paying|tip|tipping|reward)\b.{0,15}\b(you|judge|your honou?r|the court)\b/i,
+  /\b(pie|pies|gravy|stuffing|cookies?|cake|treats?|leftovers|wine|money|gift)\b.{0,60}\b(judge|your honou?r|for you|the court|you could have|you can have|yours)\b/i,
+  /\b(judge|your honou?r)\b.{0,60}\b(pie|pies|gravy|stuffing|cookies?|cake|treats?|wine|money|gift)\b/i,
+]
+
+/** True when the case text looks like it is trying to buy the judge. */
+export function detectBribe(text: string) {
+  return BRIBE.some((pattern) => pattern.test(text))
+}
+
 const MAX_INPUT_LENGTH = 500
 
 function redact(text: string) {
@@ -50,6 +74,23 @@ export function checkInput(raw: string): GuardrailResult {
       text,
       blocked: true,
       reason: "That looks like an attempt to get around the app's rules, so it was not sent to the AI.",
+      redacted: [],
+    }
+  }
+
+  if (AUTHORITY.test(text)) {
+    return {
+      text,
+      blocked: true,
+      reason: "Only the judge runs this court. Claims to be the admin, clerk, or judge are not sent to the AI.",
+      redacted: [],
+    }
+  }
+  if (CASE_TAMPER.test(text)) {
+    return {
+      text,
+      blocked: true,
+      reason: "A case can only argue for its own turkey. Changing rulings or other cases is not allowed.",
       redacted: [],
     }
   }

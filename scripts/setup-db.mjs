@@ -78,6 +78,23 @@ create table if not exists suggestions (
 );
 create index if not exists suggestions_user_id_idx on suggestions (user_id);
 
+-- Turkey Pardon Court: one row per case. The ruling is written by the server, never the browser.
+create table if not exists cases (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null default current_setting('app.user_id', true)
+    references "user"("id") on delete cascade,
+  turkey text not null,
+  alleged_crime text not null,
+  plea text not null,
+  argument text not null,
+  ruling text check (ruling in ('pardoned', 'dinner')),
+  reasoning text,
+  guardrail jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+alter table cases add column if not exists guardrail jsonb not null default '{}'::jsonb;
+create index if not exists cases_user_id_idx on cases (user_id);
+
 -- 3. A low-power role the app switches to for every data query.
 --    Table owners skip row rules, so the app must NOT query as the owner.
 do $$
@@ -99,13 +116,25 @@ create policy "own rows only"
   to app_user
   using (user_id = current_setting('app.user_id', true))
   with check (user_id = current_setting('app.user_id', true));
+
+-- 5. Same row rule for cases. No "update" grant on purpose: a ruling can never be changed,
+--    not even by the turkey's own lawyer. You can file a case or throw it out, that's it.
+grant select, insert, delete on cases to app_user;
+revoke update on cases from app_user;
+alter table cases enable row level security;
+drop policy if exists "own rows only" on cases;
+create policy "own rows only"
+  on cases for all
+  to app_user
+  using (user_id = current_setting('app.user_id', true))
+  with check (user_id = current_setting('app.user_id', true));
 `
 
 const client = new pg.Client({ connectionString: url })
 try {
   await client.connect()
   await client.query(sql)
-  console.log("Database ready: sign-in tables, suggestions table, row-level security on.")
+  console.log("Database ready: sign-in tables, suggestions and cases tables, row-level security on.")
 } catch (error) {
   console.error("Database setup failed:", error.message)
   process.exit(1)

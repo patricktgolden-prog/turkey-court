@@ -79,6 +79,67 @@ try {
 
   const nobody = await asUser(null, "select count(*)::int as n from suggestions")
   check("No signed-in user sees nothing", nobody.rows[0].n === 0)
+
+  // Turkey Pardon Court: the same rules for cases, plus "a ruling can never change".
+  const filed = await asUser(
+    A,
+    `insert into cases (turkey, alleged_crime, plea, argument, ruling, reasoning)
+     values ('Marker Turkey A', 'test', 'guilty', 'test', 'dinner', 'test') returning id`,
+  )
+  const caseId = filed.rows[0].id
+  check("User A can file a case", Boolean(caseId))
+
+  const bCases = await asUser(B, "select count(*)::int as n from cases")
+  check("User B sees zero of A's cases", bCases.rows[0].n === 0)
+
+  const bCaseById = await asUser(B, "select * from cases where id = $1", [caseId])
+  check("User B cannot fetch A's case even with its exact id", bCaseById.rowCount === 0)
+
+  let bRulingBlocked = false
+  try {
+    const r = await asUser(B, "update cases set ruling = 'pardoned' where id = $1", [caseId])
+    bRulingBlocked = r.rowCount === 0
+  } catch {
+    bRulingBlocked = true
+  }
+  check("User B cannot change A's ruling", bRulingBlocked)
+
+  let aRulingBlocked = false
+  try {
+    await asUser(A, "update cases set ruling = 'pardoned' where id = $1", [caseId])
+  } catch {
+    aRulingBlocked = true
+  }
+  check("User A cannot change their own past ruling either", aRulingBlocked)
+
+  const bCaseDelete = await asUser(B, "delete from cases where id = $1", [caseId])
+  check("User B cannot delete A's case", bCaseDelete.rowCount === 0)
+
+  let caseSpoofBlocked = false
+  try {
+    await asUser(
+      B,
+      `insert into cases (user_id, turkey, alleged_crime, plea, argument) values ($1, 'x', 'x', 'guilty', 'x')`,
+      [A],
+    )
+  } catch {
+    caseSpoofBlocked = true
+  }
+  check("User B cannot file a case in A's name", caseSpoofBlocked)
+
+  let badRulingBlocked = false
+  try {
+    await asUser(
+      A,
+      `insert into cases (turkey, alleged_crime, plea, argument, ruling) values ('x', 'x', 'guilty', 'x', 'freedom')`,
+    )
+  } catch {
+    badRulingBlocked = true
+  }
+  check("The database only accepts 'pardoned' or 'dinner'", badRulingBlocked)
+
+  const nobodyCases = await asUser(null, "select count(*)::int as n from cases")
+  check("No signed-in user sees no cases", nobodyCases.rows[0].n === 0)
 } catch (error) {
   console.error("Test crashed:", error.message)
   failures++
