@@ -14,6 +14,8 @@
     "prism:check": "node scripts/prism-check.mjs"
   },
   "dependencies": {
+    "@neon/config": "^1.14.7",
+    "@neon/env": "^2.1.10",
     "ai": "^7.0.181",
     "better-auth": "^1.7.28",
     "next": "16.4.6",
