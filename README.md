@@ -10,7 +10,7 @@ Patrick Golden built this at the **Ship AI** workshop by 3percentclub x Block Co
 
 1. You sign in with an email and password.
 2. You file a case: the turkey's name, the alleged crime, a plea, and your argument. Stuck? Hit **Load a sample case**.
-3. The server checks the case, sends it to the judge (Claude Haiku), and reads the ruling.
+3. The server checks the case, sends it to the judge (Gemini 2.5 Flash Lite), and reads the ruling.
 4. Your docket shows every ruling with a big PARDONED or DINNER stamp. Only you can see your docket.
 
 ## What the judge won't fall for
@@ -43,7 +43,7 @@ The big idea: **prompts ask, code enforces.** The judge's instructions tell it t
 - **Next.js 16** (App Router) and **Tailwind CSS**
 - **Better Auth** for email and password sign in
 - **Neon Postgres** with row level security
-- **Vercel AI Gateway** running **Claude Haiku** through the AI SDK
+- **Vercel AI Gateway** running **Gemini 2.5 Flash Lite** through the AI SDK (a model the gateway's free monthly credit covers; change `MODEL` in `app/api/plan/route.ts` to swap judges)
 - **PRISM by Block Convey** for tracing and evaluation
 
 ## Project map

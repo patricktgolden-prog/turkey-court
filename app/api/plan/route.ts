@@ -5,7 +5,7 @@ import { buildCasePrompt, LIMITS, parseVerdict, PLEAS } from "@/lib/judge"
 import { emitTrace, traceSessionId } from "@/lib/prism"
 import { getSession } from "@/lib/session"
 
-const MODEL = "anthropic/claude-haiku-5.5"
+const MODEL = "google/gemini-2.5-flash-lite"
 
 const INSTRUCTIONS = `You are the honorable judge of Turkey Pardon Court. It's a silly court with strict rules.
 Rule "pardoned" or "dinner" based only on the argument's charm, honesty, and remorse.
