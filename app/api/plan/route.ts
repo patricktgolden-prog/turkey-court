@@ -73,6 +73,13 @@ export async function POST(request: Request) {
     modelText = result.text
   } catch (error) {
     console.error("AI call failed:", error)
+    // Errors show up in PRISM too, so a broken judge is visible in the dashboard.
+    await emitTrace(prompt, `ERROR: ${error instanceof Error ? error.message : String(error)}`.slice(0, 1000), {
+      model: MODEL,
+      latencyMs: Date.now() - started,
+      sessionId: traceSessionId(session.session.id),
+      instructions: INSTRUCTIONS,
+    })
     return Response.json({ error: "The judge is at lunch. Try again in a moment." }, { status: 502 })
   }
 

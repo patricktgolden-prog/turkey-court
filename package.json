@@ -11,7 +11,8 @@
     "test:rls": "node scripts/rls-test.mjs",
     "typecheck": "tsc --noEmit",
     "test:guardrail": "node scripts/guardrail-test.mjs",
-    "prism:check": "node scripts/prism-check.mjs"
+    "prism:check": "node scripts/prism-check.mjs",
+    "deploy": "bash scripts/deploy-vercel.sh"
   },
   "dependencies": {
     "@neon/config": "^1.14.7",
