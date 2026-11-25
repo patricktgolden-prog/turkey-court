@@ -5,7 +5,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-value() { grep -E "^$1=" .env.local | head -1 | cut -d= -f2-; }
+# Reads one setting from .env.local and strips quote marks around it (Neon writes values in quotes).
+value() { grep -E "^$1=" .env.local | head -1 | cut -d= -f2- | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"; }
 
 echo "1/3  Connecting this folder to Vercel (a browser may open for sign-in)..."
 npx vercel@latest link --yes
